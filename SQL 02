@@ -1,0 +1,149 @@
+-- SELECT TOP (1000) [EmployeeId]
+--       ,[FirstName]
+--       ,[LastName]
+--       ,[Age]
+--       ,[Gender]
+--   FROM [test].[dbo].[EmployeeDemographics]
+
+/*
+Today's Topic: Case Statement
+*/
+
+SELECT FirstName, LastName, Age,
+CASE
+WHEN Age = 36 THEN 'Rim'
+WHEN Age > 30 THEN 'Old'
+WHEN Age BETWEEN 27 AND 30 THEN 'Young'
+ELSE 'Baby'
+END
+FROM test.dbo.EmployeeDemographics
+WHERE Age is NOT NULL
+ORDER BY Age
+
+
+SELECT FirstName, LastName, JobTitle, Salary,
+CASE
+WHEN JobTitle = 'HR' THEN Salary + (Salary * 0.05)
+WHEN JobTitle = 'Salesman' THEN Salary + (Salary * 0.10)
+WHEN JobTitle = 'Data Analyst' THEN Salary + (Salary * 0.13)
+ELSE Salary + (Salary * 0.03)
+END AS SalaryRaised
+FROM test.dbo.EmployeeDemographics
+JOIN test.dbo.EmployeeSalary
+ON EmployeeDemographics.EmployeeId = EmployeeSalary.EmployeeId
+
+
+SELECT JobTitle, COUNT(JobTitle)
+FROM test.dbo.EmployeeDemographics
+JOIN test.dbo.EmployeeSalary
+ON EmployeeDemographics.EmployeeId = EmployeeSalary.EmployeeId
+GROUP BY JobTitle
+HAVING COUNT(JobTitle) = 1
+
+
+SELECT JobTitle, AVG(Salary)
+FROM test.dbo.EmployeeDemographics
+JOIN test.dbo.EmployeeSalary
+ON EmployeeDemographics.EmployeeId = EmployeeSalary.EmployeeId
+GROUP BY JobTitle
+HAVING AVG(Salary) > 49000
+ORDER BY AVG(Salary)
+
+
+/*
+Topic: Updating and Deleting Data
+*/
+
+SELECT *
+FROM test.dbo.EmployeeDemographics
+
+UPDATE test.dbo.EmployeeDemographics
+SET EmployeeId = 1009
+WHERE FirstName = 'Holly' AND LastName = 'Flax'
+
+UPDATE test.dbo.EmployeeDemographics
+SET Age = 32, Gender = 'Male'
+WHERE FirstName = 'Holly' AND LastName = 'Flax'
+
+
+DELETE FROM test.dbo.EmployeeDemographics
+WHERE EmployeeId = 1006
+
+
+SELECT *
+FROM test.dbo.EmployeeDemographics
+WHERE EmployeeId = 1004
+
+ 
+SELECT *
+FROM test.dbo.EmployeeDemographics
+DELETE
+FROM test.dbo.EmployeeDemographics
+WHERE EmployeeId = 1004
+
+
+
+/*
+TOPIC:  Aliasing
+*/
+
+SELECT FirstName + ' ' + LastName As FullName
+FROM [test].[dbo].[EmployeeDemographics]
+
+SELECT AVG(Age) AS AvgAge
+FROM [test].[dbo].[EmployeeDemographics]
+
+SELECT demo.EmployeeId
+FROM [test].[dbo].[EmployeeDemographics] as demo
+
+SELECT demo.EmployeeId, sal.Salary
+FROM [test].[dbo].[EmployeeDemographics] as demo
+JOIN [test].[dbo].[EmployeeSalary] as sal
+ON demo.EmployeeId = sal.EmployeeId
+
+
+SELECT demo.EmployeeId, demo.FirstName, demo.FirstName, sal.JobTitle, ware.Age
+FROM [test].[dbo].EmployeeDemographics AS demo
+LEFT JOIN [test].[dbo].EmployeeSalary AS sal 
+on demo.EmployeeId = sal.EmployeeId
+LEFT JOIN [test].[dbo].WareHouseEmployeeDemographics AS ware
+on demo.EmployeeId = ware.EmployeeID
+
+
+SELECT FirstName, LastName, Gender, Salary, COUNT(Gender) OVER (PARTITION BY Gender) AS TotalGender
+FROM test.dbo.EmployeeDemographics AS demo
+LEFT JOIN test.dbo.EmployeeSalary AS sal
+ON demo.EmployeeId = sal.EmployeeId
+
+
+SELECT Gender, COUNT(Gender) AS TotalGender
+FROM test.dbo.EmployeeDemographics AS demo
+LEFT JOIN test.dbo.EmployeeSalary AS sal
+ON demo.EmployeeId = sal.EmployeeId
+GROUP BY Gender
+
+
+/*
+Topic: CTEs
+*/
+
+WITH CTE_Employee as 
+(SELECT FirstName, LastName, Gender, Salary, COUNT(Gender) OVER (PARTITION BY Gender) AS TotalGender,
+AVG(Salary) OVER (PARTITION BY Salary) AS AvgSalary
+FROM test.dbo.EmployeeDemographics AS demo
+JOIN test.dbo.EmployeeSalary AS sal
+ON demo.EmployeeId = sal.EmployeeId
+WHERE Salary > 49000)
+
+SELECT FirstName, AvgSalary
+FROM CTE_Employee
+
+
+Create table #temp_employee2 (
+EmployeeID int,
+JobTitle varchar(100),
+Salary int
+)
+
+Select * 
+From #temp_employee2
